@@ -134,4 +134,24 @@ public class MicrophoneStreamer {
         receiverAudioTrack.setPlaybackRate(SAMPLE_RATE);
         receiverAudioTrack.write(buffer, 0, buffer.length);
     }
+
+
+    int streamCount=0;
+    byte[] streamBuffer;
+    int bufferPacketCount=24;
+    public void playReceiverAudioTrackBuffered(byte[] buffer) {
+        streamCount++;
+        if(streamCount==1 ){
+            streamBuffer=new byte[receiverBufferSize*bufferPacketCount];
+            System.arraycopy(buffer, 0, streamBuffer, 0 , receiverBufferSize);
+        }else{
+            System.arraycopy(buffer, 0, streamBuffer, ((streamCount-1)*receiverBufferSize)-1 , receiverBufferSize);
+        }
+
+        if(streamCount==bufferPacketCount) {
+            receiverAudioTrack.setPlaybackRate(SAMPLE_RATE);
+            receiverAudioTrack.write(streamBuffer, 0, streamBuffer.length);
+            streamCount=0;
+        }
+    }
 }
